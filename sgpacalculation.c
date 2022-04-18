@@ -40,6 +40,10 @@ void search_by_grade();
 void generate_result_reg_wise();
 void generate_result_sgpa_wise();
 void search_by_name();
+void delete_single_entry();
+void delete_multiple_entries();
+void delete_all_entries();
+void delete_file();
 void overall_result();
 int sub_score(int marks);
 char generate_grade(int point);
@@ -217,7 +221,11 @@ void menu()
     printf("\n\t\t                                              =           SEARCH STUDENT BY GRADE                    ENTER 6                =                      ");
     printf("\n\t\t                                              =           SEARCH STUDENT BY NAME                     ENTER 7                =                      ");
     printf("\n\t\t                                              =           UPDATE THE RECORD                          ENTER 8                =                      ");
-    printf("\n\t\t                                              =           OVERALL RESULT                             ENTER 9               =                      ");
+    printf("\n\t\t                                              =           DELETE SINGLE ENTRY                        ENTER 9                =                      ");
+    printf("\n\t\t                                              =           DELETE MULTIPLE ENTRIES                    ENTER 10               =                      ");
+    printf("\n\t\t                                              =           DELETE ALL ENTRIES                         ENTER 11               =                      ");
+    printf("\n\t\t                                              =           DELETE FILE                                ENTER 12               =                      ");
+    printf("\n\t\t                                              =           OVERALL RESULT                             ENTER 13               =                      ");
     printf("\n\t\t                                              =           EXIT                                       ENTER 0                =                      ");
     printf("\n\t\t                                              =                                                                             =                      ");
     printf("\n\t\t           =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
@@ -253,7 +261,19 @@ void menu()
             update();
             printf("\n\t\t\t MARKS UPDATED...\n");
             break;
-        case 9:         
+        case 9:
+            delete_single_entry();
+            break;
+        case 10:
+            delete_multiple_entries();
+            break;
+        case 11:
+            delete_all_entries();
+            break;
+        case 12:
+            delete_file();
+            break;         
+        case 13:
             overall_result();
             break;               
         case 0:
@@ -1016,6 +1036,94 @@ void search_by_name()
             s[i].std_name[j]='\0';
         }      
     return;
+}
+
+void delete_single_entry()
+{
+    struct t{
+        char details[100];
+    }student[1000];
+    int i=0,j,STUDENTNUM,compare,k,c[1000],l,std_reg,marks,count=0;
+    int std_credit, sub_credit[]={SUBCR1,SUBCR2,SUBCR3,SUBCR4,SUBCR5,SUBCR6,SUBCR7,SUBCR8};
+    float total_credit=SUBCR1+SUBCR2+SUBCR3+SUBCR4+SUBCR5+SUBCR6+SUBCR7+SUBCR8,std_credit_float;
+    char grade[9],ip_name[25],std_name[25];
+    char choice='Y',comma,choice2;
+    char *sub[]={SUB1,SUB2,SUB3,SUB4,SUB5,SUB6,SUB7,SUB8};
+    STUDENTNUM=student_count();
+    fptr=fopen("project.csv","r");
+    if(fptr==NULL)
+    {
+        printf("\n\t\t\t ERROR IN FILE OPENING...\n");
+        exit(1);                                                     //Exit1
+    }
+    printf("\n\t\t\t ENTER THE NAME OF STUDENT: ");
+    scanf(" %[^\n]s",ip_name);
+    while(i<STUDENTNUM) 
+    {
+        fscanf(fptr," %[^\n]s",student[i].details);
+        compare=strncmp(ip_name,student[i].details,strlen(ip_name));
+        if(compare==0)                                         //Main Logic
+        {
+            printf("\n\t\t\t %s\n",student[i].details);
+                count++;
+        }i++;
+    }
+    fclose(fptr);
+    if(count==0)
+        printf("\n\t\t\t NO STUDENT FOUND FOR THIS NAME.\n");    
+    else
+    {
+        printf("\n\t\t\t ARE YOU SURE TO DELETE THIS STUDENT[Y/N]:");
+        scanf(" %c",&choice2);
+        if(choice2=='Y' || choice2=='y')
+        {
+            fptr=fopen("project.csv","w");
+            for(i=0;i<STUDENTNUM;i++)
+            {
+                compare=strncmp(ip_name,student[i].details,strlen(ip_name));
+                if(compare==0)
+                    printf("\n\t\t\t DELETED SUCCESSFULLY\n");
+                if(compare==0)
+                    continue;       //Main Logic... Skipping The Particular Student
+                fprintf(fptr,"%s\n",student[i].details);    
+            }
+            fclose(fptr);
+            generate_result_reg_wise();  
+        }
+    }    
+    return; 
+}
+
+void delete_multiple_entries()
+{
+    int ip_student_num;
+    printf("\n\t\t\t ENTER THE NUMBER OF ENTRIES YOU WANT TO DELETE : ");
+    scanf(" %d",&ip_student_num);
+    while(ip_student_num--)
+    {
+        delete_single_entry();
+    }
+    return;
+    
+}
+
+void delete_all_entries()
+{
+    char choice;
+    printf("\n\t\t\t ARE YOU SURE TO DELETE ALL ENTRIES[Y/N]: ");
+    scanf(" %c",&choice);
+    if(choice=='y' || choice=='Y')
+    {
+        fptr = fopen("project.csv", "w");
+        fclose(fptr);
+        printf("\n\t\t\t ALL ENTRIES HAVE BEEN DELETED SUCCESSFULLY");
+    }
+    return;
+}
+
+void delete_file()
+{
+    remove("project.csv");
 }
 
 void overall_result()
